@@ -1,8 +1,8 @@
-Data Dictionary
+#Data Dictionary
 
-team_name: team of the player
+**team_name**: team of the player
 
-game_date: date of game played
+**game_date**: date of game played
 
 season: season of game played
 
