@@ -6,6 +6,7 @@
 #---
 
 library(ggplot2)
+library(readr)
 
 iguodala <- read.csv('../data/andre-iguodala.csv', stringsAsFactors = FALSE)
 green <- read.csv('../data/graymond-green.csv', stringsAsFactors = FALSE)
