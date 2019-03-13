@@ -1,11 +1,12 @@
 #---
-#title:
-#description: create a csv data file that will contain the required variables to be used in the visualization phase
-#input(s):
-#output(s):
+#title: shot data
+#description: create a csv data file that contain the required variables to be used in the visualization phase
+#input(s): csv files downloaded from course github
+#output(s): csv and txt files that contain data that will be used in next phase
 #---
 
 library(dplyr)
+
 # Read in data set and add a column name to each imported data frame, that contains the name of the corresponding player
 iguodala <- read.csv('../data/andre-iguodala.csv', stringsAsFactors = FALSE)
 iguodala <- mutate(iguodala, name = 'Andre Iguodala')
@@ -64,6 +65,6 @@ write.csv(
 )
 
 # Use sink() to send the summary() output of the assembled table. Send this output to a text file named shots-data-summary.txt inside the output/ folder
-sink(file = '../output/shots-data-summary/txt')
+sink(file = '../output/shots-data-summary.txt')
 summary(df)
 sink()
