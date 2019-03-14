@@ -9,10 +9,10 @@ library(ggplot2)
 library(readr)
 
 iguodala <- read.csv('../data/andre-iguodala.csv', stringsAsFactors = FALSE)
-green <- read.csv('../data/graymond-green.csv', stringsAsFactors = FALSE)
+green <- read.csv('../data/draymond-green.csv', stringsAsFactors = FALSE)
 durant <- read.csv('../data/kevin-durant.csv', stringsAsFactors = FALSE)
 thompson <- read.csv('../data/klay-thompson.csv', stringsAsFactors = FALSE)
-curry <- read.csv('../data/steohen-curry.csv', stringsAsFactors = FALSE)
+curry <- read.csv('../data/stephen-curry.csv', stringsAsFactors = FALSE)
 
 court_file <- '../images/nba-court.jpg'
 court_image <- rasterGrob(
@@ -30,12 +30,12 @@ iguodala_shot_chart <- ggplot(data = iguodala) +
   theme_minimal()
 dev.off()
 
-pdf('../imgaes/graymond-green-shot-chart.pdf', width = 6.5, height = 5)
+pdf('../imgaes/draymond-green-shot-chart.pdf', width = 6.5, height = 5)
 green_shot_chart <- ggplot(data = green) +
   annotation_custom(court_image, -250, 250, -50, 420) +
   geom_point(aes(x = x, y = y, color = shot_made_flag)) +
   ylim(-50, 420) +
-  ggtitle('Shot Chart: Graymond Green') +
+  ggtitle('Shot Chart: Draymond Green') +
   theme_minimal()
 dev.off()
 
