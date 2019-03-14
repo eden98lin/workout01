@@ -1,30 +1,130 @@
 ---
-title: "Untitled"
+title: "Workout 1"
 author: "Eden Lin"
-date: "March 13, 2019"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(grid)
+library(jpeg)
+library(plotly)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+iguodala <- read.csv('../data/andre-iguodala.csv', stringsAsFactors = FALSE)
+iguodala <- mutate(iguodala, name = 'Andre Iguodala')
+green <- read.csv('../data/draymond-green.csv', stringsAsFactors = FALSE)
+green <- mutate(green, name = 'Draymond Green')
+durant <- read.csv('../data/kevin-durant.csv', stringsAsFactors = FALSE)
+durant <- mutate(durant, name = 'Kevin Durant')
+thompson <- read.csv('../data/klay-thompson.csv', stringsAsFactors = FALSE)
+thompson <- mutate(thompson, name = 'Klay Thompson')
+curry <- read.csv('../data/stephen-curry.csv', stringsAsFactors = FALSE)
+curry <- mutate(curry, name = 'Stephen Curry')
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+iguodala$shot_made_flag[iguodala$shot_made_flag == 'n'] <- 'shot_no'
+iguodala$shot_made_flag[iguodala$shot_made_flag == 'y'] <- 'shot_yes'
+green$shot_made_flag[green$shot_made_flag == 'n'] <- 'shot_no'
+green$shot_made_flag[green$shot_made_flag == 'y'] <- 'shot_yes'
+durant$shot_made_flag[durant$shot_made_flag == 'n'] <- 'shot_no'
+durant$shot_made_flag[durant$shot_made_flag == 'y'] <- 'shot_yes'
+thompson$shot_made_flag[thompson$shot_made_flag == 'n'] <- 'shot_no'
+thompson$shot_made_flag[thompson$shot_made_flag == 'y'] <- 'shot_yes'
+curry$shot_made_flag[curry$shot_made_flag == 'n'] <- 'shot_no'
+curry$shot_made_flag[curry$shot_made_flag == 'y'] <- 'shot_yes'
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+sink(file = '../output/andre-iguodala-summary.txt')
+summary(iguodala)
+sink()
+sink(file = '../output/draymond-green-summary.txt')
+summary(green)
+sink()
+sink(file = '../output/kevin-durant-summary.txt')
+summary(durant)
+sink()
+sink(file = '../output/klay-thompson-summary.txt')
+summary(thompson)
+sink()
+sink(file = '../output/stephen-curry-summary.txt')
+summary(curry)
+sink()
+```
+
+```{r}
+df <- rbind(iguodala, green, durant, thompson, curry)
+
+write.csv(
+  x = df,
+  file = '../data/shots-data.csv'
+)
+
+sink(file = '../output/shots-data-summary.txt')
+summary(df)
+sink()
+```
+
+```{r}
+#length(curry$shot_type[curry$shot_type == '2PT Field Goal'])
+#length(curry$shot_made_flag[curry$shot_made_flag == '2PT Field Goal'])
+table_2pt <- arrange(
+  summarise(
+    group_by(df, name),
+    total = length(shot_type[shot_type == '2PT Field Goal']),
+    made = length(shot_made_flag[shot_made_flag == 'shot_yes' & shot_type == '2PT Field Goal']),
+    perc_made = made/total
+  ),
+  desc(perc_made)
+)
+table_2pt
+
+table_3pt <- arrange(
+  summarise(
+    group_by(df, name),
+    total = length(shot_type[shot_type == '3PT Field Goal']),
+    made = length(shot_made_flag[shot_made_flag == 'shot_yes' & shot_type == '3PT Field Goal']),
+    perc_made = made/total
+  ),
+  desc(perc_made)
+)
+table_3pt
+
+table_total <- arrange(
+  summarise(
+    group_by(df, name),
+    total = length(shot_type),
+    made = length(shot_made_flag[shot_made_flag == 'shot_yes']),
+    perc_made = made/total
+  ),
+  desc(perc_made)
+)
+table_total
+```
+
+```{r}
+court_file <- '../images/nba-court.jpg'
+court_image <- rasterGrob(
+  readJPEG(court_file),
+  width = unit(1, 'npc'),
+  height = unit(1, 'npc')
+)
+
+pdf('../images/gsw-shot-chart.pdf', width = 8, height = 7)
+ggplot(data = df) +
+  annotation_custom(court_image, -250, 250, -50, 420) +
+  geom_point(aes(x = x, y = y, color = shot_made_flag)) +
+  facet_wrap(~ name) +
+  ylim(-50, 420) +
+  ggtitle('Shot Chart: Golden State Warriors') +
+  theme_minimal()
+dev.off()
+```
+
+```{r out.width='80%', echo=TRUE, fig.align='center'}
+knitr::include_graphics('../images/gsw-shot-chart.pdf')
+```
