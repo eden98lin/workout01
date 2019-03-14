@@ -2,277 +2,22 @@ Workout 1
 ================
 Eden Lin
 
-``` r
-library(ggplot2)
-library(dplyr)
-library(grid)
-library(jpeg)
-library(plotly)
-```
+The Higher the Effective Shotting Rate, the Higher the Salary?
+==============================================================
 
-``` r
-iguodala <- read.csv('../data/andre-iguodala.csv', stringsAsFactors = FALSE)
-iguodala <- mutate(iguodala, name = 'Andre Iguodala')
-green <- read.csv('../data/draymond-green.csv', stringsAsFactors = FALSE)
-green <- mutate(green, name = 'Draymond Green')
-durant <- read.csv('../data/kevin-durant.csv', stringsAsFactors = FALSE)
-durant <- mutate(durant, name = 'Kevin Durant')
-thompson <- read.csv('../data/klay-thompson.csv', stringsAsFactors = FALSE)
-thompson <- mutate(thompson, name = 'Klay Thompson')
-curry <- read.csv('../data/stephen-curry.csv', stringsAsFactors = FALSE)
-curry <- mutate(curry, name = 'Stephen Curry')
-```
+For those who are not particularily interested in basketball, the game generally makes little sense. One may think it is not much than throwing the ball into the basket. With this concept in mind, be able to throw the ball accurately seems like the most import skill for a basketball player to have. Therefore it may make sense for some people, that higher effective shotting percentage, means higer value, thus higher salary, of a basketball player. Is thi really true? Let's show it with some statistics.
 
-``` r
-iguodala$shot_made_flag[iguodala$shot_made_flag == 'n'] <- 'shot_no'
-iguodala$shot_made_flag[iguodala$shot_made_flag == 'y'] <- 'shot_yes'
-green$shot_made_flag[green$shot_made_flag == 'n'] <- 'shot_no'
-green$shot_made_flag[green$shot_made_flag == 'y'] <- 'shot_yes'
-durant$shot_made_flag[durant$shot_made_flag == 'n'] <- 'shot_no'
-durant$shot_made_flag[durant$shot_made_flag == 'y'] <- 'shot_yes'
-thompson$shot_made_flag[thompson$shot_made_flag == 'n'] <- 'shot_no'
-thompson$shot_made_flag[thompson$shot_made_flag == 'y'] <- 'shot_yes'
-curry$shot_made_flag[curry$shot_made_flag == 'n'] <- 'shot_no'
-curry$shot_made_flag[curry$shot_made_flag == 'y'] <- 'shot_yes'
-```
+Before getting into the data, here are some basics one may need to know about the game to understand this article. First, points in basketball are used to keep track of the score in a game. Points can be accumulated by making field goals (two or three points) or free throws (one point). If a player makes a field goal from within the three-point line, the player socres two points. If the player makes a field goal from beyong the three-point line, the player scores three points. Secondly, in a game, there are five players on court, and each of them has different positions. Shooting guard's job is to score points for his team and steal the ball on defense. A Point Guard is expected to run the team's offense by controlling the ball and making sure that it gets to the right player at the right time. Small Forward is considered to e the most versatile of the main five basketball positions, he is responsible for scoring points, defending and often as secondary or tertiary rebounders behind the power forward and center, although a few have considerable passing responsibilities. Power Forward has also been referred to as the "post" position. He typically plays offensively with their backs towards the basket and position themselves defensively uder the basket in a zone defense or against the opposing power forward in man-to-man defense. Last but not least, the center. Center usually plays near the baseline or close to the basket, they are usually the tallest players on the floor.
 
-``` r
-sink(file = '../output/andre-iguodala-summary.txt')
-summary(iguodala)
-```
+After this brief introduction, let's consider a example of five players from the Golden State Warriors: Andre Iguodala(SG/SF), Draymond Green(PF), Kevin Durant(SF), Klay Thompson(SG), and Stephen Curry(PG). From this example, we want to examine whether whether there is a relationship between a player's shooting skill and his salary. Notice that because of the different position on court, not everyone's main responsibility is to shoot, so it will be unfair and makes no sense to compare just how many points has a player won, or how many ball has he shot. If we have to compare their their shooting skill, a more reasonable way would be to compare each's ratio of successful attempts to attempts. If a player's value depends on how many balls he can get in to the basket, then higher success rate should mean higher salary. As given by the website Basketball Reference, these players' salaries in 2018-2019, ranked descendingly, are Stephen Curry, $37,457,154; Kevin Durant, $30,000,000; Klay Thompson, $18,988,725; Draymond Green, $17,469,565; and Andre Iguodala, $16,000,000.
 
-    ##   team_name          game_date             season         period     
-    ##  Length:371         Length:371         Min.   :2016   Min.   :1.000  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:2.000  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.000  
-    ##                                        Mean   :2016   Mean   :2.518  
-    ##                                        3rd Qu.:2016   3rd Qu.:4.000  
-    ##                                        Max.   :2016   Max.   :4.000  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:371         Length:371        
-    ##  1st Qu.: 1.000    1st Qu.:10.00     Class :character   Class :character  
-    ##  Median : 4.000    Median :27.00     Mode  :character   Mode  :character  
-    ##  Mean   : 4.582    Mean   :26.75                                          
-    ##  3rd Qu.: 8.000    3rd Qu.:41.00                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x         
-    ##  Length:371         Min.   : 0.00   Length:371         Min.   :-245.0  
-    ##  Class :character   1st Qu.: 1.00   Class :character   1st Qu.: -65.5  
-    ##  Mode  :character   Median :18.00   Mode  :character   Median :   0.0  
-    ##                     Mean   :13.69                      Mean   :   3.9  
-    ##                     3rd Qu.:24.00                      3rd Qu.: 101.5  
-    ##                     Max.   :49.00                      Max.   : 238.0  
-    ##        y              name          
-    ##  Min.   :-31.00   Length:371        
-    ##  1st Qu.:  2.00   Class :character  
-    ##  Median : 23.00   Mode  :character  
-    ##  Mean   : 73.62                     
-    ##  3rd Qu.:150.00                     
-    ##  Max.   :497.00
+All the data about these five players are downloaded from Github,<https://github.com/ucb-stat133/stat133-hws>. With some data manipulations using R, we can tidy up the data and perform some calculations to examine the question.
 
-``` r
-sink()
-sink(file = '../output/draymond-green-summary.txt')
-summary(green)
-```
+Like we mentioned earlier, we are going to compare these player's effective shooting percentage. We are going to do this in three different groups: the 2 points, 3 points, and overall.
 
-    ##   team_name          game_date             season         period     
-    ##  Length:578         Length:578         Min.   :2016   Min.   :1.000  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:1.000  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.000  
-    ##                                        Mean   :2016   Mean   :2.327  
-    ##                                        3rd Qu.:2016   3rd Qu.:3.000  
-    ##                                        Max.   :2016   Max.   :4.000  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:578         Length:578        
-    ##  1st Qu.: 2.000    1st Qu.:15.25     Class :character   Class :character  
-    ##  Median : 6.000    Median :31.00     Mode  :character   Mode  :character  
-    ##  Mean   : 5.536    Mean   :29.59                                          
-    ##  3rd Qu.: 9.000    3rd Qu.:44.00                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x          
-    ##  Length:578         Min.   : 0.00   Length:578         Min.   :-248.00  
-    ##  Class :character   1st Qu.: 1.00   Class :character   1st Qu.: -27.00  
-    ##  Mode  :character   Median : 6.00   Mode  :character   Median :   0.00  
-    ##                     Mean   :12.17                      Mean   :  -7.17  
-    ##                     3rd Qu.:25.00                      3rd Qu.:  18.75  
-    ##                     Max.   :55.00                      Max.   : 240.00  
-    ##        y             name          
-    ##  Min.   :-31.0   Length:578        
-    ##  1st Qu.:  8.0   Class :character  
-    ##  Median : 36.0   Mode  :character  
-    ##  Mean   :100.6                     
-    ##  3rd Qu.:217.0                     
-    ##  Max.   :535.0
+Before getting into the calculation, here we provide shot charts that visulize the positions on court they shot, and how frequent they shot compare to others. Notice that there are two colors of dots, red and blue, they are colored to differentiate the successful and failed shooting attempt. <embed src="C:/Users/Eden/Desktop/UCB/Stat 133 Spring 2019/workout01/images/gsw-shot-chart.pdf" width="80%" style="display: block; margin: auto;" type="application/pdf" />
 
-``` r
-sink()
-sink(file = '../output/kevin-durant-summary.txt')
-summary(durant)
-```
-
-    ##   team_name          game_date             season         period    
-    ##  Length:915         Length:915         Min.   :2016   Min.   :1.00  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:1.00  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.00  
-    ##                                        Mean   :2016   Mean   :2.34  
-    ##                                        3rd Qu.:2016   3rd Qu.:3.00  
-    ##                                        Max.   :2016   Max.   :4.00  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:915         Length:915        
-    ##  1st Qu.: 2.000    1st Qu.:13.00     Class :character   Class :character  
-    ##  Median : 6.000    Median :27.00     Mode  :character   Mode  :character  
-    ##  Mean   : 5.833    Mean   :28.02                                          
-    ##  3rd Qu.: 9.000    3rd Qu.:43.00                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x          
-    ##  Length:915         Min.   : 0.00   Length:915         Min.   :-246.00  
-    ##  Class :character   1st Qu.: 2.00   Class :character   1st Qu.: -29.00  
-    ##  Mode  :character   Median :14.00   Mode  :character   Median :   0.00  
-    ##                     Mean   :13.12                      Mean   :  11.43  
-    ##                     3rd Qu.:24.00                      3rd Qu.:  73.50  
-    ##                     Max.   :58.00                      Max.   : 240.00  
-    ##        y              name          
-    ##  Min.   :-39.00   Length:915        
-    ##  1st Qu.: 11.00   Class :character  
-    ##  Median : 80.00   Mode  :character  
-    ##  Mean   : 98.54                     
-    ##  3rd Qu.:173.50                     
-    ##  Max.   :572.00
-
-``` r
-sink()
-sink(file = '../output/klay-thompson-summary.txt')
-summary(thompson)
-```
-
-    ##   team_name          game_date             season         period     
-    ##  Length:1220        Length:1220        Min.   :2016   Min.   :1.000  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:1.000  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.000  
-    ##                                        Mean   :2016   Mean   :2.369  
-    ##                                        3rd Qu.:2016   3rd Qu.:3.000  
-    ##                                        Max.   :2016   Max.   :4.000  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:1220        Length:1220       
-    ##  1st Qu.: 4.000    1st Qu.:14.00     Class :character   Class :character  
-    ##  Median : 7.000    Median :29.50     Mode  :character   Mode  :character  
-    ##  Mean   : 6.511    Mean   :29.19                                          
-    ##  3rd Qu.: 9.000    3rd Qu.:44.00                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x          
-    ##  Length:1220        Min.   : 0.00   Length:1220        Min.   :-248.00  
-    ##  Class :character   1st Qu.:12.00   Class :character   1st Qu.: -68.00  
-    ##  Mode  :character   Median :20.00   Mode  :character   Median :  14.50  
-    ##                     Mean   :17.16                      Mean   :  24.89  
-    ##                     3rd Qu.:25.00                      3rd Qu.: 145.25  
-    ##                     Max.   :32.00                      Max.   : 246.00  
-    ##        y             name          
-    ##  Min.   :-29.0   Length:1220       
-    ##  1st Qu.: 16.0   Class :character  
-    ##  Median :105.0   Mode  :character  
-    ##  Mean   :106.0                     
-    ##  3rd Qu.:179.2                     
-    ##  Max.   :311.0
-
-``` r
-sink()
-sink(file = '../output/stephen-curry-summary.txt')
-summary(curry)
-```
-
-    ##   team_name          game_date             season         period     
-    ##  Length:1250        Length:1250        Min.   :2016   Min.   :1.000  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:1.000  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.000  
-    ##                                        Mean   :2016   Mean   :2.305  
-    ##                                        3rd Qu.:2016   3rd Qu.:3.000  
-    ##                                        Max.   :2016   Max.   :4.000  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:1250        Length:1250       
-    ##  1st Qu.: 1.000    1st Qu.:13.00     Class :character   Class :character  
-    ##  Median : 4.000    Median :29.00     Mode  :character   Mode  :character  
-    ##  Mean   : 4.221    Mean   :28.53                                          
-    ##  3rd Qu.: 7.000    3rd Qu.:44.00                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x           
-    ##  Length:1250        Min.   : 0.00   Length:1250        Min.   :-246.000  
-    ##  Class :character   1st Qu.: 5.00   Class :character   1st Qu.: -96.500  
-    ##  Mode  :character   Median :23.00   Mode  :character   Median :   0.500  
-    ##                     Mean   :17.99                      Mean   :  -3.642  
-    ##                     3rd Qu.:26.00                      3rd Qu.:  91.000  
-    ##                     Max.   :71.00                      Max.   : 240.000  
-    ##        y             name          
-    ##  Min.   :-36.0   Length:1250       
-    ##  1st Qu.: 18.0   Class :character  
-    ##  Median :144.0   Mode  :character  
-    ##  Mean   :135.4                     
-    ##  3rd Qu.:228.0                     
-    ##  Max.   :717.0
-
-``` r
-sink()
-```
-
-``` r
-df <- rbind(iguodala, green, durant, thompson, curry)
-
-write.csv(
-  x = df,
-  file = '../data/shots-data.csv'
-)
-
-sink(file = '../output/shots-data-summary.txt')
-summary(df)
-```
-
-    ##   team_name          game_date             season         period     
-    ##  Length:4334        Length:4334        Min.   :2016   Min.   :1.000  
-    ##  Class :character   Class :character   1st Qu.:2016   1st Qu.:1.000  
-    ##  Mode  :character   Mode  :character   Median :2016   Median :2.000  
-    ##                                        Mean   :2016   Mean   :2.351  
-    ##                                        3rd Qu.:2016   3rd Qu.:3.000  
-    ##                                        Max.   :2016   Max.   :4.000  
-    ##  minutes_remaining seconds_remaining shot_made_flag     action_type       
-    ##  Min.   : 0.000    Min.   : 0.00     Length:4334        Length:4334       
-    ##  1st Qu.: 2.000    1st Qu.:13.00     Class :character   Class :character  
-    ##  Median : 5.000    Median :29.00     Mode  :character   Mode  :character  
-    ##  Mean   : 5.412    Mean   :28.60                                          
-    ##  3rd Qu.: 8.000    3rd Qu.:43.75                                          
-    ##  Max.   :11.000    Max.   :59.00                                          
-    ##   shot_type         shot_distance     opponent               x           
-    ##  Length:4334        Min.   : 0.00   Length:4334        Min.   :-248.000  
-    ##  Class :character   1st Qu.: 2.25   Class :character   1st Qu.: -56.000  
-    ##  Mode  :character   Median :19.00   Mode  :character   Median :   1.000  
-    ##                     Mean   :15.58                      Mean   :   7.746  
-    ##                     3rd Qu.:25.00                      3rd Qu.:  95.500  
-    ##                     Max.   :71.00                      Max.   : 246.000  
-    ##        y             name          
-    ##  Min.   :-39.0   Length:4334       
-    ##  1st Qu.: 13.0   Class :character  
-    ##  Median : 95.0   Mode  :character  
-    ##  Mean   :109.4                     
-    ##  3rd Qu.:198.0                     
-    ##  Max.   :717.0
-
-``` r
-sink()
-```
-
-``` r
-#length(curry$shot_type[curry$shot_type == '2PT Field Goal'])
-#length(curry$shot_made_flag[curry$shot_made_flag == '2PT Field Goal'])
-table_2pt <- arrange(
-  summarise(
-    group_by(df, name),
-    total = length(shot_type[shot_type == '2PT Field Goal']),
-    made = length(shot_made_flag[shot_made_flag == 'shot_yes' & shot_type == '2PT Field Goal']),
-    perc_made = made/total
-  ),
-  desc(perc_made)
-)
-table_2pt
-```
+Here is the table of 2 point effective shooting percentage, rows are placed in the order from the highest 2 point effective shooting percentage to the lowest. The first column is each player'a name, the second column is the total 2 point they attempted, the third column is the number they made in, then the last column is the ratio of made-in and attempted.
 
     ## # A tibble: 5 x 4
     ##   name           total  made perc_made
@@ -282,6 +27,10 @@ table_2pt
     ## 3 Stephen Curry    563   304     0.540
     ## 4 Klay Thompson    640   329     0.514
     ## 5 Draymond Green   346   171     0.494
+
+From this table, we see that the player with the higest 2 point effective shooting percentage is Andre Iguodala, who ranked the least in salary in 2018-2019. However, despite the high effective shooting percentage, from the shot charts we can see that he is the one that shot the least. So why is there such big difference in his numbers? Well, we have to consider his position in the game, as a SG/SF, he has a versatile rolse, which sometimes may gave him good shooting chances that players of other positions do not have. In other words, his shots are more likely to be spontaneous than other players, which might be the reason for him to be the one that shoot the least but also have the highest 2 point shooting pecentage.
+
+Moving on, below is the tbale of 3 point effective shooting percentage, calculated using the same method as 2 point.
 
 ``` r
 table_3pt <- arrange(
@@ -305,6 +54,10 @@ table_3pt
     ## 4 Andre Iguodala   161    58     0.360
     ## 5 Draymond Green   232    74     0.319
 
+Here we have the most effective shooter as Klay Thompson, who also does not rank the first in salary. Compare to Andre Iguodala, we can see from the shot charts that he shot a lot more and all over the court. Considering his role as SG, looks like he has been very responsible on court. The second most effective 2 point shooter is Stephen Curry, who ranks the first, by a lot more than the second place, in salary. He also ran around the court a lot and make a lot of shooting attempts.
+
+Lastly, let's look at the overall effective shooting percentage.
+
 ``` r
 table_total <- arrange(
   summarise(
@@ -327,35 +80,4 @@ table_total
     ## 4 Stephen Curry   1250   584     0.467
     ## 5 Draymond Green   578   245     0.424
 
-``` r
-court_file <- '../images/nba-court.jpg'
-court_image <- rasterGrob(
-  readJPEG(court_file),
-  width = unit(1, 'npc'),
-  height = unit(1, 'npc')
-)
-
-pdf('../images/gsw-shot-chart.pdf', width = 8, height = 7)
-ggplot(data = df) +
-  annotation_custom(court_image, -250, 250, -50, 420) +
-  geom_point(aes(x = x, y = y, color = shot_made_flag)) +
-  facet_wrap(~ name) +
-  ylim(-50, 420) +
-  ggtitle('Shot Chart: Golden State Warriors') +
-  theme_minimal()
-```
-
-    ## Warning: Removed 22 rows containing missing values (geom_point).
-
-``` r
-dev.off()
-```
-
-    ## png 
-    ##   2
-
-``` r
-knitr::include_graphics('../images/gsw-shot-chart.pdf')
-```
-
-<embed src="../images/gsw-shot-chart.pdf" width="80%" style="display: block; margin: auto;" type="application/pdf" />
+Followed from the 2 point and 3 point, ther result here is not surprising, that the rank of percentage differentiate from the rank of salary.
